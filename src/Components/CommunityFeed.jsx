@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useAlert } from "react-alert";
 import defaultProfilePic from "../assets/images/Sample_User_Image.png";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const CommunityFeed = () => {
   const [posts, setPosts] = useState([]);
@@ -10,7 +11,6 @@ const CommunityFeed = () => {
   const [newPost, setNewPost] = useState({ title: "", content: "" });
   const [newComment, setNewComment] = useState({ postId: "", content: "" });
   const [visibleComments, setVisibleComments] = useState({});
-  const alert = useAlert();
 
   useEffect(() => {
     fetchPosts();
@@ -30,7 +30,6 @@ const CommunityFeed = () => {
     }
   };
 
-
   const handleLike = async (postId) => {
     try {
       const response = await axios.post("http://localhost:5100/api/posts/like", { postId });
@@ -44,7 +43,7 @@ const CommunityFeed = () => {
   const handleAddPost = async (e) => {
     e.preventDefault();
     if (!newPost.title.trim() || !newPost.content.trim()) {
-      alert.error("Title and content cannot be empty.");
+      toast.error("Title and content cannot be empty.");
       return;
     }
 
@@ -55,17 +54,17 @@ const CommunityFeed = () => {
       });
       setPosts([response.data.post, ...posts]);
       setNewPost({ title: "", content: "" });
-      alert.success("Post added successfully!");
+      toast.success("Post added successfully!");
     } catch (err) {
       console.error("Error adding post:", err);
-      alert.error("Failed to add post.");
+      toast.error("Failed to add post.");
     }
   };
 
   const handleAddComment = async (e, postId) => {
     e.preventDefault();
     if (!newComment.content.trim()) {
-      alert.error("Comment cannot be empty.");
+      toast.error("Comment cannot be empty.");
       return;
     }
 
@@ -81,10 +80,10 @@ const CommunityFeed = () => {
       const updatedPost = response.data.post;
       setPosts(posts.map((post) => (post._id === postId ? updatedPost : post)));
       setNewComment({ postId: "", content: "" });
-      alert.success("Comment added successfully!");
+      toast.success("Comment added successfully!");
     } catch (err) {
       console.error("Error adding comment:", err);
-      alert.error("Failed to add comment.");
+      toast.error("Failed to add comment.");
     }
   };
 
@@ -98,10 +97,10 @@ const CommunityFeed = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPosts(posts.filter((post) => post._id !== postId));
-      alert.success("Post deleted successfully!");
+      toast.success("Post deleted successfully!");
     } catch (err) {
       console.error("Error deleting post:", err);
-      alert.error("Failed to delete the post.");
+      toast.error("Failed to delete the post.");
     }
   };
 
@@ -123,10 +122,10 @@ const CommunityFeed = () => {
         )
       );
 
-      alert.success("Comment deleted successfully!");
+      toast.success("Comment deleted successfully!");
     } catch (err) {
       console.error("Error deleting comment:", err);
-      alert.error("Failed to delete the comment.");
+      toast.error("Failed to delete the comment.");
     }
   };
 
@@ -153,14 +152,15 @@ const CommunityFeed = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-12 bg-gray-50 min-h-screen space-y-8">
+      <ToastContainer position="top-center" />
+      
       {/* Community Feed Header */}
       <div className="bg-blue-100 p-6 rounded-lg shadow-lg mb-6 flex flex-col items-center justify-center text-center">
-  <h1 className="text-3xl font-bold text-blue-800">Welcome to the Community Feed</h1>
-  <p className="text-lg text-gray-700 mt-2">
-    Join discussions, share your thoughts, and connect with others! 
-  </p>
-</div>
-
+        <h1 className="text-3xl font-bold text-blue-800">Welcome to the Community Feed</h1>
+        <p className="text-lg text-gray-700 mt-2">
+          Join discussions, share your thoughts, and connect with others!
+        </p>
+      </div>
 
       {/* Post Creation */}
       <div className="card bg-white shadow-lg p-6 rounded-lg">
@@ -254,10 +254,9 @@ const CommunityFeed = () => {
                   ))}
                   <textarea
                     placeholder="Add a comment..."
-                    value={newComment.content}
+                    value={newComment.postId === post._id ? newComment.content : ""}
                     onChange={(e) =>
                       setNewComment({
-                        ...newComment,
                         content: e.target.value,
                         postId: post._id,
                       })

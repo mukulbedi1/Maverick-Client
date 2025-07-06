@@ -1,6 +1,8 @@
 import React from 'react';
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-// elements
+import { Toaster } from 'react-hot-toast';
+
+// pages
 import {
   HomeLayout,
   Error,
@@ -25,20 +27,13 @@ import {
   Sign_Alphabets,
   TextToSign,
 } from "./pages";
+
 // actions
 import { action as RegisterAction } from './pages/Register';
 import { action as LoginAction } from "./pages/Login";
+
+// components
 import { VideosPage, UploadVideo, CoursePage, CommunityFeed } from "./Components";
-
-// react-alert setup
-import { Provider as AlertProvider } from 'react-alert';
-import AlertTemplate from 'react-alert-template-basic';
-import { positions } from 'react-alert';
-
-const options = {
-  timeout: 5000,
-  position: positions.TOP_CENTER,
-};
 
 const router = createBrowserRouter([
   {
@@ -69,8 +64,8 @@ const router = createBrowserRouter([
             element: <DashBoardLanding />,
           },
           {
-            path:"TextToSign",
-            element:<TextToSign/>,
+            path: "TextToSign",
+            element: <TextToSign />,
           },
           {
             path: "Sign",
@@ -96,7 +91,6 @@ const router = createBrowserRouter([
                 index: true,
                 element: <DictionaryLanding />,
               },
-
               {
                 path: "Profile",
                 element: <Profile />,
@@ -140,9 +134,10 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <AlertProvider template={AlertTemplate} {...options}>
+    <>
+      <Toaster position="top-center" reverseOrder={false} />
       <RouterProvider router={router} />
-    </AlertProvider>
+    </>
   );
 }
 
