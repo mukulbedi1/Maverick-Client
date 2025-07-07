@@ -35,7 +35,7 @@ const UploadVideo = () => {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5100/api/videos/upload", {
+      const response = await fetch("https://maverick-server1.onrender.com/api/videos/upload", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`, // Pass token in Authorization header

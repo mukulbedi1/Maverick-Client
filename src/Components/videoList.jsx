@@ -11,7 +11,7 @@ const VideosPage = () => {
   const fetchVideos = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5100/api/videos");
+      const response = await fetch("https://maverick-server1.onrender.com/api/videos");
       if (!response.ok) {
         throw new Error(`Failed to fetch videos: ${response.statusText}`);
       }

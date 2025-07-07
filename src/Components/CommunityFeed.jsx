@@ -20,7 +20,7 @@ const CommunityFeed = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get("http://localhost:5100/api/posts");
+      const response = await axios.get("https://maverick-server1.onrender.com/api/posts");
       setPosts(response.data);
     } catch (err) {
       console.error("Error fetching posts:", err);
@@ -32,7 +32,7 @@ const CommunityFeed = () => {
 
   const handleLike = async (postId) => {
     try {
-      const response = await axios.post("http://localhost:5100/api/posts/like", { postId });
+      const response = await axios.post("https://maverick-server1.onrender.com/api/posts/like", { postId });
       const updatedPost = response.data.post;
       setPosts(posts.map((post) => (post._id === postId ? updatedPost : post)));
     } catch (err) {
@@ -49,7 +49,7 @@ const CommunityFeed = () => {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.post("http://localhost:5100/api/posts", newPost, {
+      const response = await axios.post("https://maverick-server1.onrender.com/api/posts", newPost, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPosts([response.data.post, ...posts]);
@@ -71,7 +71,7 @@ const CommunityFeed = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:5100/api/posts/comment",
+        "https://maverick-server1.onrender.com/api/posts/comment",
         { postId, content: newComment.content },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -93,7 +93,7 @@ const CommunityFeed = () => {
 
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:5100/api/posts/${postId}`, {
+      await axios.delete(`https://maverick-server1.onrender.com/api/posts/${postId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPosts(posts.filter((post) => post._id !== postId));
@@ -110,7 +110,7 @@ const CommunityFeed = () => {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.delete(`http://localhost:5100/api/posts/${postId}/comments/${commentId}`, {
+      const response = await axios.delete(`https://maverick-server1.onrender.com/api/posts/${postId}/comments/${commentId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
