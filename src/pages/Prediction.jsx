@@ -24,7 +24,7 @@ const Prediction = () => {
   const [sending, setSending] = useState(false); // New state for tracking sending process
 
   useEffect(() => {
-    const socketInstance5000 = io("https://maverick-server1.onrender.com");
+    const socketInstance5000 = io("http://localhost:5000");
     const socketInstance5103 = io("http://localhost:5103");
     setSocket5000(socketInstance5000);
     setSocket5103(socketInstance5103);

@@ -1,28 +1,24 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { useParams } from "react-router-dom";
+import customFetch from "../utils/customFetch"; // Adjust path based on your project structure
 
 const ProfilePage = () => {
-  const { userId } = useParams(); // Get userId from URL
-  const [user, setUser] = useState(null); // User details
-  const [videos, setVideos] = useState([]); // User's uploaded videos (initialize as an empty array)
+  const { userId } = useParams();
+  const [user, setUser] = useState(null);
+  const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        // Fetch user details
-        const userResponse = await axios.get(`/api/users/${userId}`);
+        const userResponse = await customFetch.get(`/api/users/${userId}`);
         setUser(userResponse.data);
 
-        // Fetch user videos
-        const videosResponse = await axios.get(`/api/users/${userId}/videos`);
-        // Check if videosResponse.data is an array, set it to an empty array if not
+        const videosResponse = await customFetch.get(`/api/users/${userId}/videos`);
         setVideos(Array.isArray(videosResponse.data) ? videosResponse.data : []);
-
-        setLoading(false);
       } catch (error) {
-        console.error("Error fetching profile data:", error);
+        console.error("Error fetching profile data:", error.message);
+      } finally {
         setLoading(false);
       }
     };
@@ -30,7 +26,7 @@ const ProfilePage = () => {
     fetchProfile();
   }, [userId]);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p style={styles.loading}>Loading...</p>;
 
   return (
     <div style={styles.container}>
@@ -38,7 +34,9 @@ const ProfilePage = () => {
       <div style={styles.profileInfo}>
         <h1 style={styles.username}>{user.username}</h1>
         <p style={styles.email}>Email: {user.email}</p>
-        <p style={styles.joined}>Joined: {new Date(user.joinedAt).toLocaleDateString()}</p>
+        <p style={styles.joined}>
+          Joined: {new Date(user.joinedAt).toLocaleDateString()}
+        </p>
       </div>
 
       {/* Uploaded Videos */}

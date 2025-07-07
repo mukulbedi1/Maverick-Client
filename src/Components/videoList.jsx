@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import customFetch from "../utils/customFetch"; // ✅ Adjust path if needed
 
 const VideosPage = () => {
   const [videos, setVideos] = useState([]);
@@ -11,16 +12,11 @@ const VideosPage = () => {
   const fetchVideos = async () => {
     setLoading(true);
     try {
-      const response = await fetch("https://maverick-server1.onrender.com/api/videos");
-      if (!response.ok) {
-        throw new Error(`Failed to fetch videos: ${response.statusText}`);
-      }
-
-      const fetchedVideos = await response.json();
-      setVideos(fetchedVideos);
+      const response = await customFetch.get("/videos"); // ✅ Replaced fetch
+      setVideos(response.data);
     } catch (err) {
       console.error("Error fetching videos:", err);
-      setError(err.message || "Failed to load videos.");
+      setError(err.response?.data?.message || "Failed to load videos.");
     } finally {
       setLoading(false);
     }

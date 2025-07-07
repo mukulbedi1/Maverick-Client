@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import defaultProfilePic from "../assets/images/Sample_User_Image.png";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import customFetch from "../utils/customFetch";
 
 const CommunityFeed = () => {
   const [posts, setPosts] = useState([]);
@@ -20,7 +20,7 @@ const CommunityFeed = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get("https://maverick-server1.onrender.com/api/posts");
+      const response = await customFetch.get("/posts");
       setPosts(response.data);
     } catch (err) {
       console.error("Error fetching posts:", err);
@@ -32,7 +32,7 @@ const CommunityFeed = () => {
 
   const handleLike = async (postId) => {
     try {
-      const response = await axios.post("https://maverick-server1.onrender.com/api/posts/like", { postId });
+      const response = await customFetch.post("/posts/like", { postId });
       const updatedPost = response.data.post;
       setPosts(posts.map((post) => (post._id === postId ? updatedPost : post)));
     } catch (err) {
@@ -49,7 +49,7 @@ const CommunityFeed = () => {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.post("https://maverick-server1.onrender.com/api/posts", newPost, {
+      const response = await customFetch.post("/posts", newPost, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPosts([response.data.post, ...posts]);
@@ -70,8 +70,8 @@ const CommunityFeed = () => {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.post(
-        "https://maverick-server1.onrender.com/api/posts/comment",
+      const response = await customFetch.post(
+        "/posts/comment",
         { postId, content: newComment.content },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -93,7 +93,7 @@ const CommunityFeed = () => {
 
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`https://maverick-server1.onrender.com/api/posts/${postId}`, {
+      await customFetch.delete(`/posts/${postId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPosts(posts.filter((post) => post._id !== postId));
@@ -110,7 +110,7 @@ const CommunityFeed = () => {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.delete(`https://maverick-server1.onrender.com/api/posts/${postId}/comments/${commentId}`, {
+      const response = await customFetch.delete(`/posts/${postId}/comments/${commentId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import customFetch from "../utils/customFetch"; // make sure this path is correct
 
 const CoursesPage = () => {
   const [courses, setCourses] = useState([]);
@@ -7,7 +7,7 @@ const CoursesPage = () => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await axios.get("https://maverick-server1.onrender.com/api/courses");
+        const response = await customFetch.get("/courses");
         setCourses(response.data);
       } catch (error) {
         console.error("Error fetching courses", error);
@@ -38,7 +38,7 @@ const CoursesPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {courses.map((course) => (
             <div
-              className="course-card bg-white border border-gray-200 rounded-lg shadow-xl transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl"
+              className="course-card bg-white border border-gray-200 rounded-lg shadow-xl transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer"
               key={course._id}
               onClick={() => handleCardClick(course.playlistUrl)}
             >

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useDropzone } from "react-dropzone";
+import customFetch from "../utils/customFetch"; // Adjust path based on your folder structure
 
 const UploadVideo = () => {
   const [file, setFile] = useState(null);
@@ -10,7 +11,6 @@ const UploadVideo = () => {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Check authentication status
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -35,27 +35,22 @@ const UploadVideo = () => {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("https://maverick-server1.onrender.com/api/videos/upload", {
-        method: "POST",
+      const response = await customFetch.post("/videos/upload", formData, {
         headers: {
-          Authorization: `Bearer ${token}`, // Pass token in Authorization header
+          Authorization: `Bearer ${token}`,
         },
-        body: formData,
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage("Video uploaded successfully!");
-        setFile(null);
-        setTitle("");
-        setDescription("");
-        setCategory("");
-      } else {
-        setMessage(data.message || "Failed to upload video.");
-      }
+      setMessage("Video uploaded successfully!");
+      setFile(null);
+      setTitle("");
+      setDescription("");
+      setCategory("");
     } catch (error) {
-      setMessage("Error uploading video.");
+      console.error(error);
+      setMessage(
+        error.response?.data?.message || "Error uploading video."
+      );
     } finally {
       setLoading(false);
     }
@@ -83,7 +78,6 @@ const UploadVideo = () => {
         Upload Video
       </h1>
 
-      {/* Drag and Drop Area */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -101,7 +95,6 @@ const UploadVideo = () => {
         )}
       </motion.div>
 
-      {/* Title Input */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -117,7 +110,6 @@ const UploadVideo = () => {
         />
       </motion.div>
 
-      {/* Description Input */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -132,7 +124,6 @@ const UploadVideo = () => {
         ></textarea>
       </motion.div>
 
-      {/* Category Selection */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -153,7 +144,6 @@ const UploadVideo = () => {
         </select>
       </motion.div>
 
-      {/* Upload Button */}
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -168,7 +158,6 @@ const UploadVideo = () => {
         {loading ? "Uploading..." : "Upload"}
       </motion.button>
 
-      {/* Message Display */}
       {message && (
         <motion.p
           initial={{ opacity: 0 }}

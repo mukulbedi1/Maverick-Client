@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { BiVideoRecording } from "react-icons/bi";
 import { FaCircleStop } from "react-icons/fa6";
-import axios from "axios";
 import { toast } from "react-toastify";
+
 const IslComponent = () => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -20,17 +20,12 @@ const IslComponent = () => {
   const [selectEnabled, setSelectEnabled] = useState(false);
   const [inputsDisabled, setInputsDisabled] = useState(true);
 
-  // Initialize WebSocket connection
   useEffect(() => {
-    const socketInstance = io("https://maverick-server1.onrender.com");
+    const socketInstance = io("http://localhost:5000");
     setSocket(socketInstance);
-
-    return () => {
-      socketInstance.disconnect();
-    };
+    return () => socketInstance.disconnect();
   }, []);
 
-  // Start webcam streaming
   const startWebcam = () => {
     navigator.mediaDevices
       .getUserMedia({ video: true })
@@ -41,7 +36,6 @@ const IslComponent = () => {
       .catch((error) => console.error("Error accessing webcam:", error));
   };
 
-  // Stop webcam streaming
   const stopWebcam = () => {
     const stream = videoRef.current?.srcObject;
     if (stream) {
@@ -50,112 +44,86 @@ const IslComponent = () => {
     }
   };
 
-  // Start recording video frames
   const startRecording = () => {
     setRecording(true);
     startWebcam();
-
-    // Delay to ensure the webcam initializes
     setTimeout(() => {
       const id = setInterval(processFrame, 600);
       setIntervalId(id);
     }, 1000);
   };
 
-  // Stop recording video frames
   const stopRecording = () => {
     toast.success("Video recording stopped succesfully !!");
     setRecording(false);
     stopWebcam();
-
-    if (intervalId) {
-      clearInterval(intervalId);
-      setIntervalId(null);
-    }
-
+    if (intervalId) clearInterval(intervalId);
+    setIntervalId(null);
     setInputsDisabled(false);
   };
 
-  // Process individual video frames
   const processFrame = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
-
-    if (!video || !canvas) {
-      console.warn("Video or Canvas is not available.");
-      return;
-    }
-
-    if (video.readyState !== 4) {
-      console.warn("Video is not ready yet.");
-      return;
-    }
+    if (!video || !canvas || video.readyState !== 4) return;
 
     const context = canvas.getContext("2d");
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    canvas.toBlob(
-      (blob) => {
-        if (blob && socket) {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const base64Image = reader.result;
-            socket.emit("process_frame", base64Image);
-          };
-          reader.readAsDataURL(blob);
-        }
-      },
-      "image/jpeg",
-      0.7
-    );
+    canvas.toBlob((blob) => {
+      if (blob && socket) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64Image = reader.result;
+          socket.emit("process_frame", base64Image);
+        };
+        reader.readAsDataURL(blob);
+      }
+    }, "image/jpeg", 0.7);
   };
 
-  // Send prediction request to the backend
   const sendPredictionRequest = async () => {
     setLoading(true);
     try {
-      const response = await axios.post(
-        "http://localhost:5102/api/py/generate",
-        {
+      const response = await fetch("http://localhost:5102/api/py/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           sentence: userInput,
           emotion: emotionDetected,
-        }
-      );
+        }),
+      });
 
-      const data = response.data;
+      if (!response.ok) throw new Error("Failed to fetch data from backend");
+
+      const data = await response.json();
       const features = data.non_manual_features
         .filter((line) => line.startsWith("*"))
         .map((line) => line.replace("*", "").trim());
 
       setNonManualFeatures(features);
       setRewrittenSentence(data.rewritten_sentence);
-      setSelectEnabled(true); // Enable the select dropdown
+      setSelectEnabled(true);
     } catch (error) {
-      console.error("Error making POST request:", error);
+      console.error("Fetch error:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle socket events
   useEffect(() => {
     if (socket) {
       socket.on("frame_processed", (data) => {
         if (data.features) {
-          // Flatten and filter the features
           const validFeatures = data.features
-            .map(
-              (feature) =>
-                Object.entries(feature)
-                  // Filter out null values
-                  .map(([key, value]) => `${key}: ${value}`) // Map keys and values into a formatted string
+            .map((feature) =>
+              Object.entries(feature).map(([key, value]) => `${key}: ${value}`)
             )
-            .flat(); // Flatten the array of arrays
+            .flat();
 
-          setExtractedFeatures(validFeatures); // Update the ExtractedFeatures state
+          setExtractedFeatures(validFeatures);
         }
 
         if (data.error) {
@@ -168,9 +136,7 @@ const IslComponent = () => {
         }
       });
 
-      return () => {
-        socket.off("frame_processed");
-      };
+      return () => socket.off("frame_processed");
     }
   }, [socket]);
 
@@ -186,8 +152,8 @@ const IslComponent = () => {
           <label className="form-control w-full max-w-xs">
             <select
               className="select select-bordered select-md w-full max-w-xs h-[12rem]"
-              size={ExtractedFeatures.length || 5} // Adjust this number to show all items
-              style={{ maxHeight: "none", overflow: "visible" }} // Ensure no vertical scroll
+              size={ExtractedFeatures.length || 5}
+              style={{ maxHeight: "none", overflow: "visible" }}
               disabled={!ExtractedFeatures.length}
             >
               <option disabled selected>
@@ -198,6 +164,7 @@ const IslComponent = () => {
               ))}
             </select>
           </label>
+
           <div className="mt-45">
             <label className="form-control w-full max-w-xs">
               <input

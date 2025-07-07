@@ -25,7 +25,7 @@ const DataSet = () => {
   const [displayType, setDisplayType] = useState("emotion"); // 'emotion' or 'word'
 
   useEffect(() => {
-    const socketInstance = io("https://maverick-server1.onrender.com");
+    const socketInstance = io("http://localhost:5000");
     setSocket(socketInstance);
 
     return () => {
